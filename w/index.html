@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A workout in Jim</title>
+  <meta name="description" content="A gym workout shared from Jim.">
+  <meta name="robots" content="noindex">
+  <meta property="og:site_name" content="Jim">
+  <meta property="og:title" content="A workout shared from Jim">
+  <meta property="og:description" content="Open it in Jim to add it to your workouts.">
+  <meta property="og:image" content="https://jim.ozbe.dev/icon.png">
+  <link rel="icon" href="../icon.png">
+  <link rel="stylesheet" href="../style.css?v=3">
+</head>
+<body>
+  <main>
+    <img class="icon" src="../icon.png" alt="Jim app icon">
+    <!-- The workout is in the part of the link after the #, which never reaches this site. -->
+    <div id="workout" hidden>
+      <p class="lede">A mate sent you a workout.</p>
+      <h1 id="name"></h1>
+      <p id="summary" class="note"></p>
+      <ol id="exercises" class="exercises"></ol>
+      <p class="beta"><a id="open" class="button" href="#">Open in Jim</a><br>
+      <span class="note">Jim shows it first, and flags anything that doesn't suit your gym or sore spots before you add it.</span></p>
+      <h2>Don't have Jim?</h2>
+      <p>Jim is a gym app for people who'd like to be a bit stronger and don't have much time. <a href="https://testflight.apple.com/join/4cYF5xu1">Join the beta on TestFlight</a>, then come back to this link.</p>
+    </div>
+    <div id="broken" hidden>
+      <h1>That link didn't work</h1>
+      <p>It may have been cut short when it was sent. Ask for it again.</p>
+    </div>
+    <footer>
+      <a href="../">About Jim</a> · <a href="../support/">Support</a> · <a href="../privacy/">Privacy policy</a>
+    </footer>
+  </main>
+  <script>
+    (function () {
+      function decode(fragment) {
+        var base64 = fragment.replace(/-/g, "+").replace(/_/g, "/");
+        while (base64.length % 4) base64 += "=";
+        var bytes = Uint8Array.from(atob(base64), function (c) { return c.charCodeAt(0); });
+        return JSON.parse(new TextDecoder().decode(bytes));
+      }
+
+      var fragment = location.hash.slice(1);
+      var plan;
+      try { plan = decode(fragment); } catch (e) { plan = null; }
+
+      if (!plan || typeof plan.n !== "string" || !Array.isArray(plan.e) || plan.e.length === 0) {
+        document.getElementById("broken").hidden = false;
+        return;
+      }
+
+      // Text only, never HTML: the link could have been made by anyone.
+      document.title = plan.n + " · Jim";
+      document.getElementById("name").textContent = plan.n;
+      var list = document.getElementById("exercises");
+      plan.e.forEach(function (item) {
+        var li = document.createElement("li");
+        var name = document.createElement("strong");
+        name.textContent = String(item.name || "Exercise");
+        li.appendChild(name);
+        var target = item.t || (item.sets + " × " + (item.lo === item.hi ? item.lo : item.lo + "–" + item.hi));
+        var detail = document.createElement("span");
+        detail.className = "note";
+        detail.textContent = String(target);
+        li.appendChild(detail);
+        list.appendChild(li);
+      });
+      var count = plan.e.length;
+      document.getElementById("summary").textContent = count + (count === 1 ? " exercise" : " exercises");
+      document.getElementById("open").href = "jim://w#" + fragment;
+      document.getElementById("workout").hidden = false;
+    })();
+  </script>
+</body>
+</html>
