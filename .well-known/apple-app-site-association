@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["95A8NB97GY.dev.ozbe.Jim"],
+        "components": [
+          { "/": "/w/*", "comment": "A shared workout plan" }
+        ]
+      }
+    ]
+  }
+}
